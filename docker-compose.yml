@@ -3,7 +3,7 @@ services:
   gpt-researcher:
     build: ./
     environment: 
-      OPENAI_API_KEY: PBc4j1ocV4mEE8erqlbYT3BlbkFJOMsmrbjmVlOto75dpqXe
+      OPENAI_API_KEY:  
     ports:
       - 8000:8000
     develop:
