@@ -97,9 +97,8 @@ class ResearchAgent:
         Returns: list[str]: The search queries for the given question
         """
         result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
-        print(f"Search queries generated text: {result}")
-        result = re.compile("\".*\"").findall(result)
-        print(f"Search queries generated text: {result}")
+        result = re.compile("\"[\w\d\s]*\"").findall(result)
+        result = [s[1:-1] for s in result]
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
         return result
 
@@ -113,7 +112,7 @@ class ResearchAgent:
 
         await self.stream_output(f"🌐 Browsing the following sites for relevant information: {new_search_urls}...")
 
-        # Create a list to hold the coroutine objects t
+        # Create a list to hold the coroutine objects
         tasks = [async_browse(url, query, self.websocket) for url in await new_search_urls]
 
         # Gather the results as they become available
@@ -128,7 +127,6 @@ class ResearchAgent:
         """
 
         await self.stream_output(f"🔎 Running research for '{query}'...")
-
         responses = await self.async_search(query)
 
         result = "\n".join(responses)
@@ -174,7 +172,7 @@ class ResearchAgent:
 
         answer = await self.call_agent(report_type_func(self.question, self.research_summary),
                                        stream=False, websocket=websocket)
-        # if websocket is True than we are streaming gpt response, so we need to wait for the final response t
+        # if websocket is True than we are streaming gpt response, so we need to wait for the final response
         final_report = answer
 
         path = await write_md_to_pdf(report_type, self.dir_path, final_report)

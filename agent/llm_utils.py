@@ -66,13 +66,11 @@ def send_chat_completion_request(
     messages, model, temperature, max_tokens, stream, websocket
 ):
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
-    content_formatter = LlamaContentFormatter() 
     if not stream:
         chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'max_new_tokens': 300})
         try:
             results = chat.invoke(messages)
-
-            print(results)
+            # print(results)
         except Exception as e:
             print(f"{Fore.RED}Error in querying Azure: {e}{Style.RESET_ALL}")
             results = None
