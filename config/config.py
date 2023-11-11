@@ -18,7 +18,7 @@ class Config(metaclass=Singleton):
         """Initialize the Config class"""
         self.debug_mode = False
         self.allow_downloads = False
-
+        
         self.selenium_web_browser = os.getenv("USE_WEB_BROWSER", "chrome")
         self.search_api = os.getenv("SEARCH_API", "tavily")
         self.llm_provider = os.getenv("LLM_PROVIDER", "ChatOpenAI")
@@ -119,8 +119,9 @@ def check_config_setup() -> None:
 
 def check_openai_api_key(cfg) -> None:
     """Check if the OpenAI API key is set in config.py or as an environment variable."""
-    if not cfg.openai_api_key:
-        raise APIKeyError("OpenAI")
+    # if not cfg.openai_api_key:
+    #     raise APIKeyError("OpenAI")
+    pass
 
 def check_tavily_api_key(cfg) -> None:
     """Check if the Tavily Search API key is set in config.py or as an environment variable."""
