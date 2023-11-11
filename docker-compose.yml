@@ -5,13 +5,12 @@ services:
     environment: 
       TAVILY_API_KEY: ${TAVILY_API_KEY} 
       SMART_LLM_MODEL: ${SMART_LLM_MODEL}
-      PYTHONUNBUFFERED: 1
       ENDPOINT_URL: ${ENDPOINT_URL}
       ENDPOINT_API_KEY: ${ENDPOINT_API_KEY}
     ports:
       - 8000:8000
     develop:
       watch:
-        - action: sync+restart
+        - action: rebuild
           path: ./
           target: /usr/src/app
