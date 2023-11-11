@@ -71,8 +71,8 @@ def send_chat_completion_request(
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     content_formatter = LlamaContentFormatter() 
     if not stream:
-        chat = OpenLLM(server_url='http://94.237.34.227:3000')
-        # chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={"temperature": temperature, "max_tokens": 1000})
+        # chat = OpenLLM(server_url='http://94.237.34.227:3000')
+        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={"max_new_tokens":250})
         # chat = AzureMLChatOnlineEndpoint(
         #     endpoint_api_key=os.getenv("ENDPOINT_API_KEY"), 
         #     endpoint_url=os.getenv("ENDPOINT_URL"),
