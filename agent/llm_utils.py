@@ -7,8 +7,9 @@ import time
 import os
 
 import openai
-from langchain.llms.azureml_endpoint import AzureMLOnlineEndpoint
-from langchain.llms.azureml_endpoint import LlamaContentFormatter
+from langchain.chat_models.azureml_endpoint import AzureMLChatOnlineEndpoint
+from langchain.chat_models.azureml_endpoint import LlamaContentFormatter
+from langchain.schema import ChatMessage
 from langchain.chains import LLMChain
 from colorama import Fore, Style
 from openai.error import APIError, RateLimitError
@@ -64,15 +65,17 @@ def create_chat_completion(
 def send_chat_completion_request(
     messages, model, temperature, max_tokens, stream, websocket
 ):
+    print(f"Sending chat completion request...")
+    print(f"Stream value: {stream}")
+    messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     content_formatter = LlamaContentFormatter() 
     if not stream:
-        llm = AzureMLOnlineEndpoint(
+        chat = AzureMLChatOnlineEndpoint(
             endpoint_api_key=os.getenv("ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("ENDPOINT_URL"),
             model_kwargs={"temperature": temperature, "max_tokens": max_tokens},
             content_formatter=content_formatter,)
-        print(messages)
-        results = [llm("Answer one") for message in messages]
+        results = chat.invoke(messages)
         # result = lc_openai.ChatCompletion.create(
         #     model=model, # Change model here to use different models
         #     messages=messages,
@@ -84,28 +87,28 @@ def send_chat_completion_request(
         return results
 
 
-async def stream_response(model, messages, temperature, max_tokens, websocket):
-    paragraph = ""
-    response = ""
-    print(f"streaming response...")
-
-    for chunk in lc_openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            provider=CFG.llm_provider,
-            stream=True,
-    ):
-        content = chunk["choices"][0].get("delta", {}).get("content")
-        if content is not None:
-            response += content
-            paragraph += content
-            if "\n" in paragraph:
-                await websocket.send_json({"type": "report", "output": paragraph})
-                paragraph = ""
-    print(f"streaming response complete")
-    return response
+# async def stream_response(model, messages, temperature, max_tokens, websocket):
+#     paragraph = ""
+#     response = ""
+#     print(f"streaming response...")
+#
+#     for chunk in lc_openai.ChatCompletion.create(
+#             model=model,
+#             messages=messages,
+#             temperature=temperature,
+#             max_tokens=max_tokens,
+#             provider=CFG.llm_provider,
+#             stream=True,
+#     ):
+#         content = chunk["choices"][0].get("delta", {}).get("content")
+#         if content is not None:
+#             response += content
+#             paragraph += content
+#             if "\n" in paragraph:
+#                 await websocket.send_json({"type": "report", "output": paragraph})
+#                 paragraph = ""
+#     print(f"streaming response complete")
+#     return response
 
 
 def choose_agent(task: str) -> dict:
