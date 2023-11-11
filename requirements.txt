@@ -21,3 +21,4 @@ tavily-python==0.2.4
 permchain==0.0.3
 arxiv
 pymupdf
+huggingface_hub

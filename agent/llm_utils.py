@@ -9,6 +9,7 @@ import os
 import openai
 from langchain.chat_models.azureml_endpoint import AzureMLChatOnlineEndpoint
 from langchain.chat_models.azureml_endpoint import LlamaContentFormatter
+from langchain.llms import HuggingFaceHub
 from langchain.schema import ChatMessage
 from langchain.chains import LLMChain
 from colorama import Fore, Style
@@ -51,13 +52,13 @@ def create_chat_completion(
     if stream and websocket is None:
         raise ValueError("Websocket cannot be None when stream is True")
 
-    # create response
+    # create response t
     for attempt in range(10):  # maximum of 10 attempts
         print(f"Stream: {stream}")
         response = send_chat_completion_request(
             messages, model, temperature, max_tokens, stream, websocket
         )
-        return response
+        if response is not None: return response
 
     logging.error("Failed to get response from OpenAI API")
     raise RuntimeError("Failed to get response from OpenAI API")
@@ -69,12 +70,18 @@ def send_chat_completion_request(
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     content_formatter = LlamaContentFormatter() 
     if not stream:
-        chat = AzureMLChatOnlineEndpoint(
-            endpoint_api_key=os.getenv("ENDPOINT_API_KEY"),
-            endpoint_url=os.getenv("ENDPOINT_URL"),
-            model_kwargs={"temperature": temperature, "max_tokens": 300},
-            content_formatter=content_formatter,)
-        results = chat.invoke(messages)
+        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={"temperature": temperature, "max_tokens": 1000})
+        # chat = AzureMLChatOnlineEndpoint(
+        #     endpoint_api_key=os.getenv("ENDPOINT_API_KEY"), 
+        #     endpoint_url=os.getenv("ENDPOINT_URL"),
+        #     model_kwargs={"temperature": temperature, "max_tokens": 1000},
+        #     content_formatter=content_formatter,)
+        try:
+            results = chat.invoke(messages)
+            # print(results)
+        except Exception as e:
+            print(f"{Fore.RED}Error in querying Azure: {e}{Style.RESET_ALL}")
+            results = None
         # result = lc_openai.ChatCompletion.create(
         #     model=model, # Change model here to use different models
         #     messages=messages,
@@ -126,8 +133,8 @@ def choose_agent(task: str) -> dict:
                 {"role": "user", "content": f"task: {task}"}],
             temperature=0,
         )
-
-        return json.loads(response)
+        raise Exception("WIP")
+        return response
     except Exception as e:
         print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
         return {"agent": "Default Agent",
