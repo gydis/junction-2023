@@ -17,6 +17,7 @@ from config import Config
 from agent import prompts
 import os
 import string
+import re
 
 
 CFG = Config()
@@ -97,7 +98,9 @@ class ResearchAgent:
         """
         result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
-        return json.loads(result)
+        result = re.compile(".*").findall(result.content)
+        print(f"Search queries generated: {result}")
+        return result
 
     async def async_search(self, query):
         """ Runs the async search for the given query.

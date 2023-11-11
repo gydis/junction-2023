@@ -53,6 +53,7 @@ def create_chat_completion(
 
     # create response
     for attempt in range(10):  # maximum of 10 attempts
+        print(f"Stream: {stream}")
         response = send_chat_completion_request(
             messages, model, temperature, max_tokens, stream, websocket
         )
@@ -65,15 +66,13 @@ def create_chat_completion(
 def send_chat_completion_request(
     messages, model, temperature, max_tokens, stream, websocket
 ):
-    print(f"Sending chat completion request...")
-    print(f"Stream value: {stream}")
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     content_formatter = LlamaContentFormatter() 
     if not stream:
         chat = AzureMLChatOnlineEndpoint(
             endpoint_api_key=os.getenv("ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("ENDPOINT_URL"),
-            model_kwargs={"temperature": temperature, "max_tokens": max_tokens},
+            model_kwargs={"temperature": temperature, "max_tokens": 300},
             content_formatter=content_formatter,)
         results = chat.invoke(messages)
         # result = lc_openai.ChatCompletion.create(
@@ -120,7 +119,6 @@ def choose_agent(task: str) -> dict:
         agent_role_prompt (str): The prompt for the agent
     """
     try:
-        print("About to choose the agent")
         response = create_chat_completion(
             model=CFG.smart_llm_model,
             messages=[
