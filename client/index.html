@@ -35,12 +35,17 @@
         .btn-show {
             display: none;
         }
+
+        input[type="range"] {
+            width: 20%;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
 <body>
 
-<section class="landing">
+<!-- <section class="landing">
     <div class="max-w-5xl mx-auto text-center">
         <h1 class="text-4xl font-extrabold mx-auto lg:text-7xl">
             Say Goodbye to <br>
@@ -55,43 +60,50 @@
         </p>
         <a href="#form" class="btn btn-primary">Get Started</a>
     </div>
-</section>
+</section> -->
 
 <main class="container" id="form">
-    <div class="agent-item"><img src="/static/defaultAgentAvatar.JPG" class="avatar"
-                                                alt="Auto Agent"></div>
-    <form method="POST" class="mt-3" onsubmit="GPTResearcher.startResearch(); return false;">
-        <div class="form-group">
-            <label for="task" class="agent-question">What would you like me to research next?</label>
-            <input type="text" id="task" name="task" class="form-control" required>
+    <div class="agent-item"><img src=
+        "https://otke-cdn.outokumpu.com/-/media/feature/identity/medium_horizontal_blue_rgb.png?h=143&amp;w=561&amp;revision=fbc0328f-0be5-43bd-81a3-8100c0258ffa&amp;modified=20190916043102&amp;webp=true" 
+        alt="Outokumpu"></div>
+        <form method="POST" class="mt-3" onsubmit="GPTResearcher.startResearch(); return false;">
+            <div class="input-group">
+                <input type="text" id="task" name="task" class="form-control" style="border-radius: 0;" placeholder="Ask me a question">
+                <div class="input-group-append">
+                    <input type="submit" value="Research" class="btn btn-primary button-padding">
+                </div>
+            </div>
             <input type="radio" name="agent" id="autoAgent" value="Auto Agent" checked hidden>
-        </div>
+        </form>        
         <div class="form-group">
             <div class="row">
-
-
             </div>
             <button type="button" id="btnShowAuto" class="btn btn-secondary mt-3 btn-show">Auto Agent</button>
         </div>
         <div class="form-group">
             <label for="report_type" class="agent-question">What type of report would you like me to generate?</label>
-            <select name="report_type" class="form-control" required>
+            <select name="report_type" class="form-control" style="border-radius: 0;" required>
                 <option value="research_report">Research Report</option>
                 <option value="resource_report">Resource Report</option>
                 <option value="outline_report">Outline Report</option>
             </select>
         </div>
-        <input type="submit" value="Research" class="btn btn-primary button-padding">
+        <div style="display: block ruby;">
+            <label for="slider" style="display: flex;">Queries</label>
+            <input type="range" id="slider" name="slider" min="0" max="50" value="25" style="display: flex;
+                                                                                            top: 0.35em;
+                                                                                            position: relative;">
+            <span id="sliderValue" style="display: flex;"></span>
+        </div>
     </form>
 
     <div class="margin-div">
-        <h2>Agent Output</h2>
-        <p class="mt-2 text-left" style="font-size: 0.8rem;">An agent tailored specifically to your task
-                        will be generated to provide the most precise and relevant research results.</p>
+        <!-- <h2>Search Status</h2> --> 
+        <p class="mt-2 text-left" style="font-size: 0.8rem;"></p>
         <div id="output"></div>
     </div>
     <div class="margin-div">
-        <h2>Research Report</h2>
+        <!-- <h2>Research Report</h2> --> 
         <div id="reportContainer"></div>
         <div id="reportActions">
             <div class="alert alert-info" role="alert" id="status"></div>
@@ -128,6 +140,13 @@
         btnChoose.style.display = 'inline-block';
         autoAgentDiv.style.display = 'flex';
         agentChoices[0].style.display = 'none';
+    });
+
+
+    const slider = document.getElementById('slider');
+    const sliderValue = document.getElementById('sliderValue')
+    slider.addEventListener('input', () => {
+        sliderValue.textContent = slider.value;
     });
 </script>
 </body>

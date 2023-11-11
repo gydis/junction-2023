@@ -4,10 +4,13 @@ import json
 
 from fastapi import WebSocket
 import time
+import os
 
 import openai
-from langchain.adapters import openai as lc_openai
 from langchain.chat_models.azureml_endpoint import AzureMLChatOnlineEndpoint
+from langchain.chat_models.azureml_endpoint import LlamaContentFormatter
+from langchain.schema import ChatMessage
+from langchain.chains import LLMChain
 from colorama import Fore, Style
 from openai.error import APIError, RateLimitError
 
@@ -50,6 +53,7 @@ def create_chat_completion(
 
     # create response
     for attempt in range(10):  # maximum of 10 attempts
+        print(f"Stream: {stream}")
         response = send_chat_completion_request(
             messages, model, temperature, max_tokens, stream, websocket
         )
@@ -62,41 +66,48 @@ def create_chat_completion(
 def send_chat_completion_request(
     messages, model, temperature, max_tokens, stream, websocket
 ):
+    messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
+    content_formatter = LlamaContentFormatter() 
     if not stream:
-        result = lc_openai.ChatCompletion.create(
-            model=model, # Change model here to use different models
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            provider=CFG.llm_provider, # Change provider here to use a different API
-        )
-        return result["choices"][0]["message"]["content"]
-    else:
-        return stream_response(model, messages, temperature, max_tokens, websocket)
+        chat = AzureMLChatOnlineEndpoint(
+            endpoint_api_key=os.getenv("ENDPOINT_API_KEY"),
+            endpoint_url=os.getenv("ENDPOINT_URL"),
+            model_kwargs={"temperature": temperature, "max_tokens": 300},
+            content_formatter=content_formatter,)
+        results = chat.invoke(messages)
+        # result = lc_openai.ChatCompletion.create(
+        #     model=model, # Change model here to use different models
+        #     messages=messages,
+        #     temperature=temperature,
+        #     max_tokens=max_tokens,
+        #     provider=CFG.llm_provider, # Change provider here to use a different API
+        # )
+        # return result["choices"][0]["message"]["content"]
+        return results
 
 
-async def stream_response(model, messages, temperature, max_tokens, websocket):
-    paragraph = ""
-    response = ""
-    print(f"streaming response...")
-
-    for chunk in lc_openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            provider=CFG.llm_provider,
-            stream=True,
-    ):
-        content = chunk["choices"][0].get("delta", {}).get("content")
-        if content is not None:
-            response += content
-            paragraph += content
-            if "\n" in paragraph:
-                await websocket.send_json({"type": "report", "output": paragraph})
-                paragraph = ""
-    print(f"streaming response complete")
-    return response
+# async def stream_response(model, messages, temperature, max_tokens, websocket):
+#     paragraph = ""
+#     response = ""
+#     print(f"streaming response...")
+#
+#     for chunk in lc_openai.ChatCompletion.create(
+#             model=model,
+#             messages=messages,
+#             temperature=temperature,
+#             max_tokens=max_tokens,
+#             provider=CFG.llm_provider,
+#             stream=True,
+#     ):
+#         content = chunk["choices"][0].get("delta", {}).get("content")
+#         if content is not None:
+#             response += content
+#             paragraph += content
+#             if "\n" in paragraph:
+#                 await websocket.send_json({"type": "report", "output": paragraph})
+#                 paragraph = ""
+#     print(f"streaming response complete")
+#     return response
 
 
 def choose_agent(task: str) -> dict:

@@ -5,11 +5,11 @@
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
-    color: #fff;
+    font-family: "Tee Franklin Forever",Helvetica,Arial,sans-serif !important;
+    color: #3c3c3c;
     line-height: 1.6;
     background-size: 200% 200%;
-    background-image: linear-gradient(45deg, #151A2D, #2D284D, #151A2D);
+    background-image: linear-gradient(to top, #009EE8, white);
     animation: gradientBG 10s ease infinite;
 }
 
@@ -39,20 +39,22 @@ body {
     max-width: 900px;
     margin: auto;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.732);
+    border-radius: 0px;
+    /*box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1);*/
     transition: all .3s ease-in-out;
     margin-bottom: 180px;
+    margin-top: 50px;
+    background: transparent;
 }
 
-.container:hover {
+/*.container:hover {
     transform: scale(1.01);
     box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.2);
-}
+}*/
 
 input, select, #output, #reportContainer {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.825);
     border: none;
     color: #fff;
     transition: all .3s ease-in-out;
@@ -66,9 +68,10 @@ input:hover, input:focus, select:hover, select:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(to right, #0062cc, #007bff);
+    background: linear-gradient(to right, #009EE8, #009EE8);
     border: none;
     transition: all .3s ease-in-out;
+    border-radius: 0;
 }
 
 .btn-secondary {
@@ -107,10 +110,10 @@ footer {
 }
 
 .agent_response {
-    background-color: #747d8c;
+    background-color: #003057;
     margin: 10px;
     padding: 10px;
-    border-radius: 12px;
+    border-radius: 0px;
 }
 
 #output {
@@ -119,13 +122,14 @@ footer {
     padding: 10px;
     margin-bottom: 10px;
     margin-top: 10px;
+    background: transparent;
 }
 
 #reportContainer {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0);
     border: none;
     color: #fff;
     transition: all .3s ease-in-out;
     padding: 10px;
-    border-radius: 12px;
+    border-radius: 0px;
 }
