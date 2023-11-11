@@ -97,8 +97,8 @@ class ResearchAgent:
         Returns: list[str]: The search queries for the given question
         """
         result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
+        result = re.compile("\".*\"").findall(result.content)
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
-        result = re.compile(".*").findall(result.content)
         print(f"Search queries generated: {result}")
         return result
 
@@ -172,9 +172,9 @@ class ResearchAgent:
         await self.stream_output(f"✍️ Writing {report_type} for research task: {self.question}...")
 
         answer = await self.call_agent(report_type_func(self.question, self.research_summary),
-                                       stream=websocket is not None, websocket=websocket)
-        # if websocket is True than we are streaming gpt response, so we need to wait for the final response
-        final_report = await answer if websocket else answer
+                                       stream=False, websocket=websocket)
+        # if websocket is True than we are streaming gpt response, so we need to wait for the final response t
+        final_report = answer.content
 
         path = await write_md_to_pdf(report_type, self.dir_path, final_report)
 
