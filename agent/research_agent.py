@@ -24,12 +24,13 @@ CFG = Config()
 
 
 class ResearchAgent:
-    def __init__(self, question, agent, agent_role_prompt, websocket=None):
+    def __init__(self, question, agent, agent_role_prompt, workload, websocket=None):
         """ Initializes the research assistant with the given question.
         Args: question (str): The question to research
         Returns: None
         """
-
+        
+        self.workload = workload
         self.question = question
         self.agent = agent
         self.agent_role_prompt = agent_role_prompt if agent_role_prompt else prompts.generate_agent_role_prompt(agent)
@@ -96,7 +97,7 @@ class ResearchAgent:
         Args: None
         Returns: list[str]: The search queries for the given question
         """
-        result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
+        result = await self.call_agent(prompts.generate_search_queries_prompt(self.question, self.workload))
         result = re.compile("\".*\"").findall(result.content)
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
         print(f"Search queries generated: {result}")
@@ -158,7 +159,7 @@ class ResearchAgent:
         Args: None
         Returns: list[str]: The concepts for the given question
         """
-        result = self.call_agent(prompts.generate_concepts_prompt(self.question, self.research_summary))
+        result = self.call_agent(prompts.generate_concepts_prompt(self.question, self.research_summary, self.workload))
 
         await self.stream_output(f"I will research based on the following concepts: {result}\n")
         return json.loads(result)

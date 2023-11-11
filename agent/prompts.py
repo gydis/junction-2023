@@ -36,15 +36,15 @@ def generate_report_prompt(question, research_summary, report_format="apa", repo
             f"Please do your best, this is very important to my career. "\
            f"Assume that the current date is {datetime.now().strftime('%B %d, %Y')}"
 
-def generate_search_queries_prompt(question):
+def generate_search_queries_prompt(question, workload):
     """ Generates the search queries prompt for the given question.
     Args: question (str): The question to generate the search queries prompt for
     Returns: str: The search queries prompt for the given question
     """
 
-    return f'Write 3 google search queries to search online that form an objective opinion from the following: "{question}"'\
+    return f'Write in maximum {workload} google search queries to search online that form an objective opinion from the following: "{question}"'\
            f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n' \
-           f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].'
+           f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3" ....].'
 
 
 def generate_resource_report_prompt(question, research_summary):
@@ -79,14 +79,14 @@ def generate_outline_report_prompt(question, research_summary):
            ' The research report should be detailed, informative, in-depth, and a minimum of 1,200 words.' \
            ' Use appropriate Markdown syntax to format the outline and ensure readability.'
 
-def generate_concepts_prompt(question, research_summary):
+def generate_concepts_prompt(question, research_summary, workload):
     """ Generates the concepts prompt for the given question.
     Args: question (str): The question to generate the concepts prompt for
             research_summary (str): The research summary to generate the concepts prompt for
     Returns: str: The concepts prompt for the given question
     """
 
-    return f'"""{research_summary}""" Using the above information, generate a list of 5 main concepts to learn for a research report'\
+    return f'"""{research_summary}""" Using the above information, generate a list of {workload / 2} main concepts to learn for a research report'\
            f' on the following question or topic: "{question}". The outline should provide a well-structured framework'\
            'You must respond with a list of strings in the following format: ["concepts 1", "concepts 2", "concepts 3", "concepts 4, concepts 5"]'
 

@@ -1,3 +1,5 @@
+
+
 const GPTResearcher = (() => {
     const init = () => {
       // Not sure, but I think it would be better to add event handlers here instead of in the HTML
@@ -40,11 +42,13 @@ const GPTResearcher = (() => {
         const task = document.querySelector('input[name="task"]').value;
         const report_type = document.querySelector('select[name="report_type"]').value;
         const agent = document.querySelector('input[name="agent"]:checked').value;
+        const workload = document.querySelector('input[name="slider"]').value;
   
         const requestData = {
           task: task,
           report_type: report_type,
           agent: agent,
+          workload: workload,
         };
   
         socket.send(`start ${JSON.stringify(requestData)}`);
@@ -147,4 +151,5 @@ const GPTResearcher = (() => {
       startResearch,
       copyToClipboard,
     };
+
   })();
