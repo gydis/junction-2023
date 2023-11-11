@@ -97,9 +97,10 @@ class ResearchAgent:
         Returns: list[str]: The search queries for the given question
         """
         result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
+        print(f"Search queries generated text: {result}")
         result = re.compile("\".*\"").findall(result)
+        print(f"Search queries generated text: {result}")
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
-        print(f"Search queries generated: {result}")
         return result
 
     async def async_search(self, query):

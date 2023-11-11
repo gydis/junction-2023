@@ -22,3 +22,4 @@ permchain==0.0.3
 arxiv
 pymupdf
 huggingface_hub
+openllm
