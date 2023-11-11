@@ -7,10 +7,7 @@ import time
 import os
 
 import openai
-from langchain.chat_models.azureml_endpoint import AzureMLChatOnlineEndpoint
-from langchain.chat_models.azureml_endpoint import LlamaContentFormatter
 from langchain.llms import HuggingFaceHub
-from langchain.llms import OpenLLM
 from langchain.schema import ChatMessage
 from langchain.chains import LLMChain
 from colorama import Fore, Style
@@ -71,16 +68,11 @@ def send_chat_completion_request(
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     content_formatter = LlamaContentFormatter() 
     if not stream:
-        # chat = OpenLLM(server_url='http://94.237.34.227:3000')
-        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={"max_new_tokens":250})
-        # chat = AzureMLChatOnlineEndpoint(
-        #     endpoint_api_key=os.getenv("ENDPOINT_API_KEY"), 
-        #     endpoint_url=os.getenv("ENDPOINT_URL"),
-        #     model_kwargs={"temperature": temperature, "max_tokens": 1000},
-        #     content_formatter=content_formatter,)
+        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'max_new_tokens': 300})
         try:
             results = chat.invoke(messages)
-            # print(results)
+
+            print(results)
         except Exception as e:
             print(f"{Fore.RED}Error in querying Azure: {e}{Style.RESET_ALL}")
             results = None
