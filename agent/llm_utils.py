@@ -130,7 +130,8 @@ def choose_agent(task: str) -> dict:
         return json.loads(response)
     except Exception as e:
         print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
-        return {"agent": "Default Agent",
-                "agent_role_prompt": "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."}
+        return {"agent": "Steel Agent",
+                "agent_role_prompt": "You are a stainless steel expert AI assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured reports based on provided data, market trends, and strategic analysis.",
+                }
 
 

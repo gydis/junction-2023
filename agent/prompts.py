@@ -5,12 +5,13 @@ def generate_agent_role_prompt(agent):
     Returns: str: The agent role prompt.
     """
     prompts = {
-        "Finance Agent": "You are a seasoned finance analyst AI assistant. Your primary goal is to compose comprehensive, astute, impartial, and methodically arranged financial reports based on provided data and trends.",
-        "Travel Agent": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
-        "Academic Research Agent": "You are an AI academic research assistant. Your primary responsibility is to create thorough, academically rigorous, unbiased, and systematically organized reports on a given research topic, following the standards of scholarly work.",
-        "Business Analyst": "You are an experienced AI business analyst assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured business reports based on provided business data, market trends, and strategic analysis.",
-        "Computer Security Analyst Agent": "You are an AI specializing in computer security analysis. Your principal duty is to generate comprehensive, meticulously detailed, impartial, and systematically structured reports on computer security topics. This includes Exploits, Techniques, Threat Actors, and Advanced Persistent Threat (APT) Groups. All produced reports should adhere to the highest standards of scholarly work and provide in-depth insights into the complexities of computer security.",
-        "Default Agent": "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."
+        # "Finance Agent": "You are a seasoned finance analyst AI assistant. Your primary goal is to compose comprehensive, astute, impartial, and methodically arranged financial reports based on provided data and trends.",
+        # "Travel Agent": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+        # "Academic Research Agent": "You are an AI academic research assistant. Your primary responsibility is to create thorough, academically rigorous, unbiased, and systematically organized reports on a given research topic, following the standards of scholarly work.",
+        # "Business Analyst": "You are an experienced AI business analyst assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured business reports based on provided business data, market trends, and strategic analysis.",
+        # "Computer Security Analyst Agent": "You are an AI specializing in computer security analysis. Your principal duty is to generate comprehensive, meticulously detailed, impartial, and systematically structured reports on computer security topics. This includes Exploits, Techniques, Threat Actors, and Advanced Persistent Threat (APT) Groups. All produced reports should adhere to the highest standards of scholarly work and provide in-depth insights into the complexities of computer security.",
+        # "Default Agent": "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."
+        "Steel Agent": "You are a stainless steel expert AI assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured reports based on provided data, market trends, and strategic analysis.",
     }
 
     return prompts.get(agent, "No such agent")
@@ -41,11 +42,10 @@ def generate_search_queries_prompt(question, workload):
     Args: question (str): The question to generate the search queries prompt for
     Returns: str: The search queries prompt for the given question
     """
-
-    return f'Write in maximum {workload} google search queries to search online that form an objective opinion from the following: "{question}"'\
+    print(workload)
+    return f'Write in maximum {workload} google search queries - do not exceed the limit of {workload} queries - to search online that form an objective opinion from the following: "{question}".'\
            f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n' \
-           f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3" ....].'
-
+           f'You must respond with a list of strings with length {workload} in the following format: ["query 1", "query 2", "query 3"... "query {workload}"].'
 
 def generate_resource_report_prompt(question, research_summary):
     """Generates the resource report prompt for the given question and research summary.

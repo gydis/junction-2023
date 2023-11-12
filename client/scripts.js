@@ -43,6 +43,9 @@ const GPTResearcher = (() => {
         const report_type = document.querySelector('select[name="report_type"]').value;
         const agent = document.querySelector('input[name="agent"]:checked').value;
         const workload = document.querySelector('input[name="slider"]').value;
+        console.log(workload)
+        console.log(typeof(workload))
+        console.log(document.querySelector('input[name="slider"]').value)
   
         const requestData = {
           task: task,
@@ -152,4 +155,5 @@ const GPTResearcher = (() => {
       copyToClipboard,
     };
 
+    
   })();
