@@ -68,14 +68,14 @@ input:hover, input:focus, select:hover, select:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(to right, #009EE8, #009EE8);
+    background: linear-gradient(to right, #009EE8, #003057);
     border: none;
     transition: all .3s ease-in-out;
     border-radius: 0;
 }
 
 .btn-secondary {
-    background: linear-gradient(to right, #6c757d, #6c757d);
+    background: linear-gradient(to right, #003057, #024882);
     border: none;
     transition: all .3s ease-in-out;
 }
