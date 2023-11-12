@@ -75,7 +75,7 @@ class ResearchAgent:
 
         return new_urls
 
-    async def call_agent(self, action, stream=False, websocket=None):
+    async def call_agent(self, action, stream=False, websocket=None, w=None):
         messages = [{
             "role": "system",
             "content": self.agent_role_prompt
@@ -83,6 +83,17 @@ class ResearchAgent:
             "role": "user",
             "content": action,
         }]
+        if w is not None:
+            answer = create_chat_completion(
+                model=CFG.smart_llm_model,
+                messages=messages,
+                stream=stream,
+                websocket=websocket,
+                temperature=0.6,
+                max_tokens=1000,
+                repetition_penalty=10,
+                top_p=0.95,
+            )
         answer = create_chat_completion(
             model=CFG.smart_llm_model,
             messages=messages,
@@ -170,10 +181,11 @@ class ResearchAgent:
         report_type_func = prompts.get_report_by_type(report_type)
         await self.stream_output(f"✍️ Writing {report_type} for research task: {self.question}...")
 
+        print(f"Prompt for the final report:\n{report_type_func(self.question, self.research_summary)}")
         answer = await self.call_agent(report_type_func(self.question, self.research_summary),
                                        stream=False, websocket=websocket)
         # if websocket is True than we are streaming gpt response, so we need to wait for the final response
-        print(f"Final answer from the model: {answer}")
+        # print(f"Final answer from the model: {answer}")
         final_report = answer
 
         path = await write_md_to_pdf(report_type, self.dir_path, final_report)

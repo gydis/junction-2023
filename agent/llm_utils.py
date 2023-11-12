@@ -29,7 +29,7 @@ def create_chat_completion(
     messages: list,  # type: ignore
     model: Optional[str] = None,
     temperature: float = 0.2,
-    max_tokens: Optional[int] = 2000,
+    max_tokens: Optional[int] = 400,
     stream: Optional[bool] = False,
     websocket: WebSocket | None = None,
     repetition_penalty = None,
@@ -72,9 +72,9 @@ def send_chat_completion_request(
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     if not stream:
         chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'temperatue': temperature, 'max_new_tokens': max_tokens, 'repetition_penalty': repetition_penalty, 'top_p': top_p})
-        summc = HuggingFaceHub(repo_id="facebook/bart-large-cnn")
+        summ = HuggingFaceHub(repo_id="facebook/bart-large-cnn")
         try:
-            results = chat.invoke(messages) if not summ else summc.invoke(messages)
+            results = chat.invoke(messages) if not summ else summ.invoke(messages)
             # print(results)
         except Exception as e:
             print(f"{Fore.RED}Error in querying Azure: {e}{Style.RESET_ALL}")
