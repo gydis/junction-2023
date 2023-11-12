@@ -45,7 +45,8 @@ async def websocket_endpoint(websocket: WebSocket):
             if data.startswith("start"):
                 json_data = json.loads(data[6:])
                 task = json_data.get("task")
-                report_type = json_data.get("report_type")
+                # report_type = json_data.get("report_type")
+                report_type = "research_report"
                 agent = json_data.get("agent")
                 workload = json_data.get("workload")
                 # temporary so "normal agents" can still be used and not just auto generated, will be removed when we move to auto generated
