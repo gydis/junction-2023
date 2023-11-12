@@ -100,7 +100,7 @@ class APIKeyError(Exception):
 
         return (
             Fore.RED
-            + f"Please set your {self.service_name} API key in .env or as an environment variable '{service_env}'.\n"
+            + f"For fuck sake Please set your {self.service_name} API key in .env or as an environment variable '{service_env}'.\n"
             + f"You can get your key from {link} \n"
             + "Alternatively, you can change the 'search_api' value in config.py to 'duckduckgo'."
         )
