@@ -11,6 +11,9 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 from langchain.llms import HuggingFaceHub
 from langchain.schema import ChatMessage
+from langchain.chat_models.azureml_endpoint import AzureMLChatOnlineEndpoint
+from langchain.chat_models.azureml_endpoint import LlamaContentFormatter
+
 from langchain.chains import LLMChain
 from colorama import Fore, Style
 from openai.error import APIError, RateLimitError
@@ -71,10 +74,17 @@ def send_chat_completion_request(
 ):
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     if not stream:
-        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'temperatue': temperature, 'max_new_tokens': max_tokens, 'repetition_penalty': repetition_penalty, 'top_p': top_p})
-        summ = HuggingFaceHub(repo_id="facebook/bart-large-cnn")
+        content_formatter = LlamaContentFormatter() 
+        chat = AzureMLChatOnlineEndpoint(
+            endpoint_api_key=os.getenv("ENDPOINT_API_KEY"),
+            endpoint_url=os.getenv("ENDPOINT_URL"),
+            model_kwargs={"temperature": temperature, "max_tokens": 300},
+            content_formatter=content_formatter,)
+
+        # chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'temperatue': temperature, 'max_new_tokens': max_tokens, 'repetition_penalty': repetition_penalty, 'top_p': top_p})
+        summ_c = HuggingFaceHub(repo_id="facebook/bart-large-cnn")
         try:
-            results = chat.invoke(messages) if not summ else summ.invoke(messages)
+            results = chat.invoke(messages) if not summ else summ_c.invoke(messages)
             # print(results)
         except Exception as e:
             print(f"{Fore.RED}Error in querying Azure: {e}{Style.RESET_ALL}")

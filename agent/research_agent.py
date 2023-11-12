@@ -83,24 +83,13 @@ class ResearchAgent:
             "role": "user",
             "content": action,
         }]
-        if w is not None:
-            answer = create_chat_completion(
-                model=CFG.smart_llm_model,
-                messages=messages,
-                stream=stream,
-                websocket=websocket,
-                temperature=0.6,
-                max_tokens=1000,
-                repetition_penalty=10,
-                top_p=0.95,
-            )
         answer = create_chat_completion(
             model=CFG.smart_llm_model,
             messages=messages,
             stream=stream,
             websocket=websocket,
         )
-        return answer
+        return answer.content
 
     async def create_search_queries(self):
         """ Creates the search queries for the given question.
