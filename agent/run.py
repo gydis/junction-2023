@@ -56,5 +56,6 @@ async def run_agent(task, report_type, agent, agent_role_prompt, workload, webso
     end_time = datetime.datetime.now()
     await websocket.send_json({"type": "logs", "output": f"\nEnd time: {end_time}\n"})
     await websocket.send_json({"type": "logs", "output": f"\nTotal run time: {end_time - start_time}\n"})
+    await websocket.send_json({"type": "logs", "output": f"\nEnergy consumption: {(end_time-start_time).total_seconds()*(0.00010555555)} kWh\n"})
 
     return report, path

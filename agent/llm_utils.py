@@ -31,8 +31,8 @@ import logging
 def create_chat_completion(
     messages: list,  # type: ignore
     model: Optional[str] = None,
-    temperature: float = 0.2,
-    max_tokens: Optional[int] = 400,
+    temperature: float = 0.1,
+    max_tokens: Optional[int] = 200,
     stream: Optional[bool] = False,
     websocket: WebSocket | None = None,
     repetition_penalty = None,
@@ -78,7 +78,7 @@ def send_chat_completion_request(
         chat = AzureMLChatOnlineEndpoint(
             endpoint_api_key=os.getenv("ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("ENDPOINT_URL"),
-            model_kwargs={"temperature": temperature, "max_tokens": 300},
+            model_kwargs={"temperature": temperature, "max_tokens": max_tokens},
             content_formatter=content_formatter,)
 
         # chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'temperatue': temperature, 'max_new_tokens': max_tokens, 'repetition_penalty': repetition_penalty, 'top_p': top_p})
@@ -120,7 +120,6 @@ def choose_agent(task: str) -> dict:
     #     return response
     # except Exception as e:
     #     print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
-    return {"agent": "Default Agent",
-            "agent_role_prompt": "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."}
+    return {"agent":"Steel Agent", "agent_role_prompt": "You are a stainless steel expert AI assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured reports based on provided data, market trends, and strategic analysis."}
 
 

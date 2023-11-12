@@ -44,22 +44,6 @@ class ResearchAgent:
             return print(output)
         await self.websocket.send_json({"type": "logs", "output": output})
 
-
-    async def summarize(self, text, topic):
-        """ Summarizes the given text for the given topic.
-        Args: text (str): The text to summarize
-                topic (str): The topic to summarize the text for
-        Returns: str: The summarized text
-        """
-
-        messages = [create_message(text, topic)]
-        await self.stream_output(f"📝 Summarizing text for query: {text}")
-
-        return create_chat_completion(
-            model=CFG.fast_llm_model,
-            messages=messages,
-        )
-
     async def get_new_urls(self, url_set_input):
         """ Gets the new urls from the given url set.
         Args: url_set_input (set[str]): The url set to get the new urls from
@@ -84,12 +68,22 @@ class ResearchAgent:
             "role": "user",
             "content": action,
         }]
-        answer = create_chat_completion(
-            model=CFG.smart_llm_model,
-            messages=messages,
-            stream=stream,
-            websocket=websocket,
-        )
+        if w is not None:
+            answer = create_chat_completion(
+                model=CFG.smart_llm_model,
+                messages=messages,
+                stream=stream,
+                websocket=websocket,
+                max_tokens=500,
+            )
+        else:
+            answer = create_chat_completion(
+                model=CFG.smart_llm_model,
+                messages=messages,
+                stream=stream,
+                websocket=websocket,
+            )
+            
         return answer.content
 
     async def create_search_queries(self):
@@ -97,9 +91,11 @@ class ResearchAgent:
         Args: None
         Returns: list[str]: The search queries for the given question
         """
-        result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
-        result = re.compile("\"[\w\d\s]*\"").findall(result)
-        result = [s[1:-1] for s in result]
+        result = await self.call_agent(prompts.generate_search_queries_prompt(self.question, self.workload))
+        # await self.stream_output(f"🔎 I got this shit: {result}...")
+        result = re.compile("\"[^\"]*\"").findall(result)
+        result = [s[1:-2] for s in result]
+        result = result[:int(self.workload)]
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
         return result
 
@@ -152,17 +148,6 @@ class ResearchAgent:
 
         return self.research_summary
 
-
-    async def create_concepts(self):
-        """ Creates the concepts for the given question.
-        Args: None
-        Returns: list[str]: The concepts for the given question
-        """
-        result = self.call_agent(prompts.generate_concepts_prompt(self.question, self.research_summary, self.workload))
-
-        await self.stream_output(f"I will research based on the following concepts: {result}\n")
-        return json.loads(result)
-
     async def write_report(self, report_type, websocket=None):
         """ Writes the report for the given question.
         Args: None
@@ -173,21 +158,12 @@ class ResearchAgent:
 
         print(f"Prompt for the final report:\n{report_type_func(self.question, self.research_summary)}")
         answer = await self.call_agent(report_type_func(self.question, self.research_summary),
-                                       stream=False, websocket=websocket)
+                                       stream=False, websocket=websocket, w=True)
         # if websocket is True than we are streaming gpt response, so we need to wait for the final response
         # print(f"Final answer from the model: {answer}")
         final_report = answer
 
         path = await write_md_to_pdf(report_type, self.dir_path, final_report)
+        await self.stream_output(f"📝 Final report:\n {final_report}")
 
         return answer, path
-
-    async def write_lessons(self):
-        """ Writes lessons on essential concepts of the research.
-        Args: None
-        Returns: None
-        """
-        concepts = await self.create_concepts()
-        for concept in concepts:
-            answer = await self.call_agent(prompts.generate_lesson_prompt(concept), stream=True)
-            await write_md_to_pdf("Lesson", self.dir_path, answer)
