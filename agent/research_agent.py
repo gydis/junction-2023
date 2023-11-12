@@ -76,7 +76,7 @@ class ResearchAgent:
 
         return new_urls
 
-    async def call_agent(self, action, stream=False, websocket=None):
+    async def call_agent(self, action, stream=False, websocket=None, w=None):
         messages = [{
             "role": "system",
             "content": self.agent_role_prompt
@@ -90,17 +90,17 @@ class ResearchAgent:
             stream=stream,
             websocket=websocket,
         )
-        return answer
+        return answer.content
 
     async def create_search_queries(self):
         """ Creates the search queries for the given question.
         Args: None
         Returns: list[str]: The search queries for the given question
         """
-        result = await self.call_agent(prompts.generate_search_queries_prompt(self.question, self.workload))
-        result = re.compile("\".*\"").findall(result.content)
+        result = await self.call_agent(prompts.generate_search_queries_prompt(self.question))
+        result = re.compile("\"[\w\d\s]*\"").findall(result)
+        result = [s[1:-1] for s in result]
         await self.stream_output(f"🧠 I will conduct my research based on the following queries: {result}...")
-        print(f"Search queries generated: {result}")
         return result
 
     async def async_search(self, query):
@@ -128,7 +128,6 @@ class ResearchAgent:
         """
 
         await self.stream_output(f"🔎 Running research for '{query}'...")
-
         responses = await self.async_search(query)
 
         result = "\n".join(responses)
@@ -172,10 +171,12 @@ class ResearchAgent:
         report_type_func = prompts.get_report_by_type(report_type)
         await self.stream_output(f"✍️ Writing {report_type} for research task: {self.question}...")
 
+        print(f"Prompt for the final report:\n{report_type_func(self.question, self.research_summary)}")
         answer = await self.call_agent(report_type_func(self.question, self.research_summary),
                                        stream=False, websocket=websocket)
-        # if websocket is True than we are streaming gpt response, so we need to wait for the final response t
-        final_report = answer.content
+        # if websocket is True than we are streaming gpt response, so we need to wait for the final response
+        # print(f"Final answer from the model: {answer}")
+        final_report = answer
 
         path = await write_md_to_pdf(report_type, self.dir_path, final_report)
 
