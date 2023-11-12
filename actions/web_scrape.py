@@ -26,6 +26,10 @@ from processing.html import extract_hyperlinks, format_hyperlinks
 
 from concurrent.futures import ThreadPoolExecutor
 
+import os
+from processing.text import write_to_file 
+import hashlib # TESTING
+
 executor = ThreadPoolExecutor()
 
 FILE_DIR = Path(__file__).parent.parent
@@ -37,7 +41,7 @@ async def async_browse(url: str, question: str, websocket: WebSocket) -> str:
 
     Args:
         url (str): The url of the website to browse
-        question (str): The question asked by the user
+        question (str): The search query which generated the link
         websocket (WebSocketManager): The websocket manager
 
     Returns:
@@ -73,38 +77,8 @@ async def async_browse(url: str, question: str, websocket: WebSocket) -> str:
         return f"Information gathered from url {url}: {summary_text}"
     except Exception as e:
         print(f"An error occurred while processing the url {url}: {e}")
-        return f"Error processing the url {url}: {e}"
-
-
-def browse_website(url: str, question: str) -> tuple[str, WebDriver]:
-    """Browse a website and return the answer and links to the user
-
-    Args:
-        url (str): The url of the website to browse
-        question (str): The question asked by the user
-
-    Returns:
-        Tuple[str, WebDriver]: The answer and links to the user and the webdriver
-    """
-
-    if not url:
-        return "A URL was not specified, cancelling request to browse website.", None
-
-    driver, text = scrape_text_with_selenium(url)
-    add_header(driver)
-    summary_text = summary.summarize_text(url, text, question, driver)
-
-    links = scrape_links_with_selenium(driver, url)
-
-    # Limit links to 5
-    if len(links) > 5:
-        links = links[:5]
-
-    # write_to_file('research-{0}.txt'.format(url), summary_text + "\nSource Links: {0}\n\n".format(links))
-
-    close_browser(driver)
-    return f"Answer gathered from website: {summary_text} \n \n Links: {links}", driver
-
+        return ""
+        # return f"Error processing the url {url}: {e}"
 
 def scrape_text_with_selenium(url: str) -> tuple[WebDriver, str]:
     """Scrape text from a website using selenium
@@ -168,8 +142,11 @@ def scrape_text_with_selenium(url: str) -> tuple[WebDriver, str]:
         text = get_text(soup)
 
     lines = (line.strip() for line in text.splitlines())
-    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+    chunks = (phrase.strip() for line in lines for phrase in line.split("  ")) # WTF is this? why double-space
     text = "\n".join(chunk for chunk in chunks if chunk)
+    os.makedirs(os.path.dirname(f"./outputs/scrapes/scrape-{hashlib.sha1(url.encode()).hexdigest()}.txt"), exist_ok=True)
+    write_to_file(f"./outputs/scrapes/scrape-{hashlib.sha1(url.encode()).hexdigest()}.txt", url+text) # TESTING
+
     return driver, text
 
 

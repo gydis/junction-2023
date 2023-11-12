@@ -78,7 +78,10 @@ def summarize_text(
         summary = create_chat_completion(
             model=CFG.fast_llm_model,
             messages=messages,
-            max_tokens=CFG.summary_token_limit
+            max_tokens=400,
+            temperature=0.2,
+            repetition_penalty=10,
+            top_p=0.95
         )
         summaries.append(summary)
         #memory_to_add = f"Source: {url}\n" f"Content summary part#{i + 1}: {summary}"
@@ -94,7 +97,7 @@ def summarize_text(
         max_tokens=CFG.summary_token_limit
     )
     print("Final summary length: ", len(combined_summary))
-    print(final_summary)
+    # print(final_summary)
 
     return final_summary
 
@@ -127,9 +130,11 @@ def create_message(chunk: str, question: str) -> Dict[str, str]:
     return {
         "role": "user",
         "content": f'"""{chunk}"""\n'
-        f'Using the above text, summarize it based on the following task or query: "{question}".\n'
+        # NOTE - question is actually a query, not the original question, nor a ? question
+        # f'You must not exceed 100 word count.',
+        f'Using the above text, summarize it based on the following task or query: "{question}".\n' 
         f'If the query cannot be answered using the text, YOU MUST summarize the text in short.\n'
-        f'Include all factual information such as numbers, stats, quotes, etc if available.',
+        f'Include all factual information such as numbers, stats, quotes, etc if available.\n',
     }
 
 def write_to_file(filename: str, text: str) -> None:
@@ -139,6 +144,7 @@ def write_to_file(filename: str, text: str) -> None:
         text (str): The text to write
         filename (str): The filename to write to
     """
+    print(f"Writing to file: {filename}") # TESTING
     with open(filename, "w") as file:
         file.write(text)
 

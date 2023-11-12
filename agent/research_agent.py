@@ -173,6 +173,7 @@ class ResearchAgent:
         answer = await self.call_agent(report_type_func(self.question, self.research_summary),
                                        stream=False, websocket=websocket)
         # if websocket is True than we are streaming gpt response, so we need to wait for the final response
+        print(f"Final answer from the model: {answer}")
         final_report = answer
 
         path = await write_md_to_pdf(report_type, self.dir_path, final_report)

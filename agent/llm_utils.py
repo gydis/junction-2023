@@ -7,6 +7,8 @@ import time
 import os
 
 import openai
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 from langchain.llms import HuggingFaceHub
 from langchain.schema import ChatMessage
 from langchain.chains import LLMChain
@@ -26,10 +28,12 @@ import logging
 def create_chat_completion(
     messages: list,  # type: ignore
     model: Optional[str] = None,
-    temperature: float = CFG.temperature,
-    max_tokens: Optional[int] = None,
+    temperature: float = 0.2,
+    max_tokens: Optional[int] = 400,
     stream: Optional[bool] = False,
     websocket: WebSocket | None = None,
+    repetition_penalty = None,
+    top_p = None,
 ) -> str:
     """Create a chat completion using the OpenAI API
     Args:
@@ -50,24 +54,23 @@ def create_chat_completion(
     if stream and websocket is None:
         raise ValueError("Websocket cannot be None when stream is True")
 
-    # create response t
+    # create response
     for attempt in range(10):  # maximum of 10 attempts
         print(f"Stream: {stream}")
         response = send_chat_completion_request(
-            messages, model, temperature, max_tokens, stream, websocket
+            messages, model, temperature, max_tokens, stream, websocket, repetition_penalty, top_p
         )
         if response is not None: return response
 
     logging.error("Failed to get response from OpenAI API")
     raise RuntimeError("Failed to get response from OpenAI API")
 
-
 def send_chat_completion_request(
-    messages, model, temperature, max_tokens, stream, websocket
+    messages, model, temperature, max_tokens, stream, websocket, repetition_penalty, top_p
 ):
     messages = [ChatMessage(content=e['content'], role=e['role']) for e in messages]
     if not stream:
-        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'max_new_tokens': 300})
+        chat = HuggingFaceHub(repo_id="HuggingFaceH4/zephyr-7b-beta", model_kwargs={'temperatue': temperature, 'max_new_tokens': max_tokens, 'repetition_penalty': repetition_penalty, 'top_p': top_p})
         try:
             results = chat.invoke(messages)
             # print(results)
@@ -85,30 +88,6 @@ def send_chat_completion_request(
         return results
 
 
-# async def stream_response(model, messages, temperature, max_tokens, websocket):
-#     paragraph = ""
-#     response = ""
-#     print(f"streaming response...")
-#
-#     for chunk in lc_openai.ChatCompletion.create(
-#             model=model,
-#             messages=messages,
-#             temperature=temperature,
-#             max_tokens=max_tokens,
-#             provider=CFG.llm_provider,
-#             stream=True,
-#     ):
-#         content = chunk["choices"][0].get("delta", {}).get("content")
-#         if content is not None:
-#             response += content
-#             paragraph += content
-#             if "\n" in paragraph:
-#                 await websocket.send_json({"type": "report", "output": paragraph})
-#                 paragraph = ""
-#     print(f"streaming response complete")
-#     return response
-
-
 def choose_agent(task: str) -> dict:
     """Determines what agent should be used
     Args:
@@ -117,19 +96,19 @@ def choose_agent(task: str) -> dict:
         agent - The agent that will be used
         agent_role_prompt (str): The prompt for the agent
     """
-    try:
-        response = create_chat_completion(
-            model=CFG.smart_llm_model,
-            messages=[
-                {"role": "system", "content": f"{auto_agent_instructions()}"},
-                {"role": "user", "content": f"task: {task}"}],
-            temperature=0,
-        )
-        raise Exception("WIP")
-        return response
-    except Exception as e:
-        print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
-        return {"agent": "Default Agent",
-                "agent_role_prompt": "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."}
+    # try:
+    #     response = create_chat_completion(
+    #         model=CFG.smart_llm_model,
+    #         messages=[
+    #             {"role": "system", "content": f"{auto_agent_instructions()}"},
+    #             {"role": "user", "content": f"task: {task}"}],
+    #         temperature=0,
+    #     )
+    #     raise Exception("WIP")
+    #     return response
+    # except Exception as e:
+    #     print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
+    return {"agent": "Default Agent",
+            "agent_role_prompt": "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."}
 
 
