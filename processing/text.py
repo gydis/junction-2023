@@ -9,11 +9,12 @@ from config import Config
 from agent.llm_utils import create_chat_completion
 import os
 from md2pdf.core import md2pdf
+import hashlib
 
 CFG = Config()
 
 
-def split_text(text: str, max_length: int = 8192) -> Generator[str, None, None]:
+def split_text(text: str, max_length: int = 24000) -> Generator[str, None, None]:
     """Split text into chunks of a maximum length
 
     Args:
@@ -73,15 +74,16 @@ def summarize_text(
 
         #MEMORY.add_documents([Document(page_content=memory_to_add)])
 
-        messages = [create_message(chunk, question)]
+        messages = [create_message(chunk, question, chunk_flag=True)]
 
         summary = create_chat_completion(
             model=CFG.fast_llm_model,
             messages=messages,
-            max_tokens=400,
+            max_tokens=200,
             temperature=0.2,
-            repetition_penalty=10,
-            top_p=0.95
+            repetition_penalty=15,
+            top_p=0.95,
+            summ=True,
         )
         summaries.append(summary)
         #memory_to_add = f"Source: {url}\n" f"Content summary part#{i + 1}: {summary}"
@@ -89,12 +91,18 @@ def summarize_text(
         #MEMORY.add_documents([Document(page_content=memory_to_add)])
 
     combined_summary = "\n".join(summaries)
-    messages = [create_message(combined_summary, question)]
+    os.makedirs(os.path.dirname(f"./outputs/chunk-summary/scrape-{hashlib.sha1(url.encode()).hexdigest()}.txt"), exist_ok=True)
+    write_to_file(f"./outputs/chunk-summary/scrape-{hashlib.sha1(url.encode()).hexdigest()}.txt", url+combined_summary) # TESTING
+
+    messages = [create_message(combined_summary, question, chunk_flag=True)]
 
     final_summary = create_chat_completion(
         model=CFG.fast_llm_model,
         messages=messages,
-        max_tokens=CFG.summary_token_limit
+        max_tokens=400,
+        temperature=0.2,
+        repetition_penalty=20,
+        summ=True,
     )
     print("Final summary length: ", len(combined_summary))
     # print(final_summary)
@@ -117,7 +125,7 @@ def scroll_to_percentage(driver: WebDriver, ratio: float) -> None:
     driver.execute_script(f"window.scrollTo(0, document.body.scrollHeight * {ratio});")
 
 
-def create_message(chunk: str, question: str) -> Dict[str, str]:
+def create_message(chunk: str, question: str, chunk_flag: bool = False) -> Dict[str, str]:
     """Create a message for the chat completion
 
     Args:
@@ -130,11 +138,15 @@ def create_message(chunk: str, question: str) -> Dict[str, str]:
     return {
         "role": "user",
         "content": f'"""{chunk}"""\n'
-        # NOTE - question is actually a query, not the original question, nor a ? question
-        # f'You must not exceed 100 word count.',
-        f'Using the above text, summarize it based on the following task or query: "{question}".\n' 
-        f'If the query cannot be answered using the text, YOU MUST summarize the text in short.\n'
-        f'Include all factual information such as numbers, stats, quotes, etc if available.\n',
+        # note - question is actually a query, not the original question, nor a ? question
+        # f'you must not exceed 100 word count.',
+        f'using the above text, summarize it based on the following task or query: "{question}".\n' 
+        f'if the query cannot be answered using the text, you must summarize the text in short.\n'
+        f'include all factual information such as numbers, stats, quotes, etc if available.\n',
+    } if not chunk_flag else {
+        "role": "user",
+        "content": f'"""{chunk}"""\n',
+        # f'Here is the summary of the preceding text, including all factual information such as numbers, stats, quotes, etc if available.\n',
     }
 
 def write_to_file(filename: str, text: str) -> None:
